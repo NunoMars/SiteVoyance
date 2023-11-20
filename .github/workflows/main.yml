@@ -1,1 +1,229 @@
+name: Deploy the app in LXD containers
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up LXD
+      uses: whywaita/setup-lxd@v1  
+      with:
+        lxd_version: latest/stable
+
+    - name: Launch LXD containers
+      run: |
+        lxc launch ubuntu:20.04 app-container-1
+        lxc launch ubuntu:20.04 app-container-2
+        lxc launch ubuntu:20.04 lb-container
+        lxc launch ubuntu:20.04 db-postgresql
+        lxc launch ubuntu:20.04 dns-container
+        lxc launch ubuntu:20.04 firewall-container
+
+    - name: Configure LXD containers
+      run: |
+        # Configure app-container-1
+        lxc exec app-container-1 -- apt update
+        lxc exec app-container-1 -- apt install -y python3
+        # Add more configuration steps specific to app-container-1
+
+        # Configure app-container-2
+        lxc exec app-container-2 -- apt update
+        lxc exec app-container-2 -- apt install -y python3
+        # Add more configuration steps specific to app-container-2
+
+        # Configure lb-container
+        lxc exec lb-container -- apt update
+        lxc exec lb-container -- apt install -y nginx certbot python3-certbot-nginx
+        # Add more configuration steps specific to lb-container
+
+        # Configure db-postgresql
+        lxc exec db-postgresql -- apt update
+        lxc exec db-postgresql -- apt install -y postgresql
+        # Add more configuration steps specific to db-postgresql
+
+        # Configure dns-container
+        lxc exec dns-container -- apt update
+        lxc exec dns-container -- apt install -y bind9
+        # Add more configuration steps specific to dns-container
+
+        # Configure firewall-container
+        lxc exec firewall-container -- apt update
+        lxc exec firewall-container -- apt install -y iptables
+        # Add more configuration steps specific to firewall-container
+
+        # Allow communication between containers
+        lxc network attach lxdbr0 app-container-1 eth0
+        lxc network attach lxdbr0 app-container-2 eth0
+        lxc network attach lxdbr0 db-postgresql eth0
+
+        # Ensure port forwarding for services (adjust ports as needed)
+        lxc config device add lb-container lb-proxy proxy listen=tcp:0.0.0.0:80 connect=tcp:localhost:80
+
+    - name: Deploy Database (PostgreSQL)
+      run: |
+        # Install PostgreSQL in the container
+        lxc exec db-postgresql -- apt update
+        lxc exec db-postgresql -- apt install -y postgresql
+
+        # Configure PostgreSQL
+        lxc exec db-postgresql -- sudo -u postgres psql -c "CREATE USER Nuno WITH PASSWORD 'bcxau9p^^123.';"
+        lxc exec db-postgresql -- sudo -u postgres createdb -O Nuno siteVoyance
+
+        # Enable remote access to PostgreSQL
+        echo "host all all 0.0.0.0/0 md5" | lxc exec db-postgresql -- tee -a /etc/postgresql/*/main/pg_hba.conf
+        echo "listen_addresses = '*'" | lxc exec db-postgresql -- tee -a /etc/postgresql/*/main/postgresql.conf
+
+        # Restart PostgreSQL to apply changes
+        lxc exec db-postgresql -- systemctl restart postgresql
+
+    - name: Deploy DNS (BIND9)
+      run: |
+        # Install BIND9 in the DNS container
+        lxc exec dns-container -- apt update
+        lxc exec dns-container -- apt install -y bind9
+
+        # Configure BIND9 for the local zone
+        echo 'zone "local" {' > dns.conf
+        echo '    type master;' >> dns.conf
+        echo '    file "/etc/bind/db.local";' >> dns.conf
+        echo '};' >> dns.conf
+
+        echo '$TTL 86400' > db.local
+        echo '@       IN      SOA     ns1.local. admin.local. (' >> db.local
+        echo '                  2023112001      ; Serial' >> db.local
+        echo '                  3600            ; Refresh' >> db.local
+        echo '                  1800            ; Retry' >> db.local
+        echo '                  604800          ; Expire' >> db.local
+        echo '                  86400 )         ; Negative Cache TTL' >> db.local
+        echo '    IN      NS      ns1.local.' >> db.local
+        echo 'ns1     IN      A       192.168.1.10' >> db.local  # Replace with the IP address of your DNS server
+
+        # Restart BIND9 to apply changes
+        lxc exec dns-container -- systemctl restart bind9
+
+    - name: Deploy Load Balancer (Nginx)
+    run: |
+        # Install Nginx in the load balancer container
+        lxc exec lb-container -- apt update
+        lxc exec lb-container -- apt install -y nginx certbot python3-certbot-nginx
+        
+        # Configure Nginx as a reverse proxy (adjust configuration as needed)
+        echo 'server {' > /etc/nginx/sites-available/default
+        echo '    listen 80;' >> /etc/nginx/sites-available/default
+        echo '    server_name nunomars-server.eddi.cloud;' >> /etc/nginx/sites-available/default
+        echo '' >> /etc/nginx/sites-available/default
+        echo '    location / {' >> /etc/nginx/sites-available/default
+        echo '        proxy_pass http://app-server;' >> /etc/nginx/sites-available/default
+        echo '        proxy_set_header Host $host;' >> /etc/nginx/sites-available/default
+        echo '        proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/sites-available/default
+        echo '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/sites-available/default
+        echo '        proxy_set_header X-Forwarded-Proto $scheme;' >> /etc/nginx/sites-available/default
+        echo '    }' >> /etc/nginx/sites-available/default
+        echo '}' >> /etc/nginx/sites-available/default
+        
+        # Install SSL certificate with Certbot
+        certbot --nginx -d nunomars-server.eddi.cloud
+        
+        # Restart Nginx to apply changes
+        lxc exec lb-container -- systemctl restart nginx
+
+    - name: Deploy Application to app-container-1
+    run: |
+        # Clone your Django repository
+        lxc exec app-container-1 -- apt update
+        lxc exec app-container-1 -- apt install -y git python3-venv
+        lxc exec app-container-1 -- git clone https://github.com/votre-utilisateur/votre-projet.git SiteVoyance
+    
+        # Create and activate a virtual environment
+        lxc exec app-container-1 -- python3 -m venv SiteVoyance/venv
+        lxc exec app-container-1 -- source SiteVoyance/venv/bin/activate
+    
+        # Install project dependencies
+        lxc exec app-container-1 -- pip install -r SiteVoyance/requirements.txt
+    
+        # Apply database migrations and collect static files
+        lxc exec app-container-1 -- python SiteVoyance/manage.py migrate
+        lxc exec app-container-1 -- python SiteVoyance/manage.py collectstatic --noinput
+        lxc exec app-container-1 -- python SiteVoyance/manage.py loaddata SiteVoyance/database_dumps/MajorArcana.json
+    
+        # Create Gunicorn service file
+        lxc exec app-container-1 -- bash -c 'echo "[Unit]" > /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "Description=gunicorn daemon for site_tarot" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "[Service]" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "User=root" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "Group=root" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "WorkingDirectory=/path/to/your/project/SiteVoyance" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "ExecStart=/path/to/your/project/SiteVoyance/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 SiteVoyance.wsgi:application" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "[Install]" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-1 -- bash -c 'echo "WantedBy=multi-user.target" >> /etc/systemd/system/site_tarot_gunicorn.service'
+    
+        # Enable and start Gunicorn service
+        lxc exec app-container-1 -- systemctl enable site_tarot_gunicorn
+        lxc exec app-container-1 -- systemctl start site_tarot_gunicorn
+
+    - name: Deploy Application to app-container-2
+    run: |
+        # Clone your Django repository
+        lxc exec app-container-2 -- apt update
+        lxc exec app-container-2 -- apt install -y git python3-venv
+        lxc exec app-container-2 -- git clone https://github.com/votre-utilisateur/votre-projet.git SiteVoyance
+    
+        # Create and activate a virtual environment
+        lxc exec app-container-2 -- python3 -m venv SiteVoyance/venv
+        lxc exec app-container-2 -- source SiteVoyance/venv/bin/activate
+    
+        # Install project dependencies
+        lxc exec app-container-2 -- pip install -r SiteVoyance/requirements.txt
+    
+        # Apply database migrations and collect static files
+        lxc exec app-container-2 -- python SiteVoyance/manage.py migrate
+        lxc exec app-container-2 -- python SiteVoyance/manage.py collectstatic --noinput
+    
+        # Create Gunicorn service file
+        lxc exec app-container-2 -- bash -c 'echo "[Unit]" > /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "Description=gunicorn daemon for site_tarot" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "[Service]" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "User=root" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "Group=root" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "WorkingDirectory=/path/to/your/project/SiteVoyance" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "ExecStart=/path/to/your/project/SiteVoyance/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 SiteVoyance.wsgi:application" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "[Install]" >> /etc/systemd/system/site_tarot_gunicorn.service'
+        lxc exec app-container-2 -- bash -c 'echo "WantedBy=multi-user.target" >> /etc/systemd/system/site_tarot_gunicorn.service'
+    
+        # Enable and start Gunicorn service
+        lxc exec app-container-2 -- systemctl enable site_tarot_gunicorn
+        lxc exec app-container-2 -- systemctl start site_tarot_gunicorn
+      
+    - name: Deploy Firewall (iptables)
+    run: |
+        # Allow incoming traffic on the ports used by your Django application (e.g., 8000)
+        lxc exec firewall-container -- iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+    
+        # Allow incoming traffic on the ports used by Gunicorn (e.g., 8000)
+        lxc exec firewall-container -- iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+    
+        # Allow incoming traffic on the ports used by Nginx (e.g., 80 for HTTP, 443 for HTTPS)
+        lxc exec firewall-container -- iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+        lxc exec firewall-container -- iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+    
+        # Allow incoming traffic on other necessary ports (adjust as needed)
+    
+        # Drop all other incoming traffic
+        lxc exec firewall-container -- iptables -A INPUT -j DROP
+    
+    - name: Save Firewall Rules
+    run: |
+        # Save the firewall rules so they persist after reboot
+        lxc exec firewall-container -- iptables-save > /etc/iptables/rules.v4

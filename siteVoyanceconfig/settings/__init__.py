@@ -23,13 +23,13 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY") or "testkey"
+SECRET_KEY = "\\\ta(xZQ;xUIly1X@IGT:4re$"
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
 DEBUG = "PROD" not in os.environ
 
-ALLOWED_HOSTS = ["herokuapps.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['nunomars-server.eddi.cloud', 'localhost']
 
 
 # Application definition
