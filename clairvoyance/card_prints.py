@@ -1,7 +1,7 @@
 from random import randint as rand
 from .models import MajorArcana
 
-    
+
 def response_card(name, chosed_card_deck, chosed_theme):
     """
     Draw the Tarot response, the last card.
@@ -10,17 +10,17 @@ def response_card(name, chosed_card_deck, chosed_theme):
     card = _average_result_card(chosed_card_deck)
 
     themes = {
-        "love" : card.card_signification_love,
-        "work" : card.card_signification_work,
-        "gen" : card.card_signification_gen,
+        "love": card.card_signification_love_fr,
+        "work": card.card_signification_work_fr,
+        "gen": card.card_signification_gen_fr,
     }
 
     return {
         "user_name": name,
         "card_image": card.card_image.url,
-        "card_name": card.card_name,
+        "card_name": card.card_name_fr.capitalize(),
         "chosed_theme_signification": themes[chosed_theme],
-        "warnings" : card.card_signification_warnings,
+        "warnings": card.card_signification_warnings_fr,
     }, card
 
 
@@ -38,29 +38,29 @@ def polarity_calcul(list_of_polarity):
     percentage_positif = round(percentage(items_on_list, how_positif), 2)
     percentage_negatif = round(percentage(items_on_list, how_negatif), 2)
 
-
     if how_negatif != 0 and how_negatif < how_positif:
         return f"Résultat plutôt positif avec {str(percentage_positif)}% des cartes!!"
 
     elif how_positif != 0 and how_positif < how_negatif:
-        return f"Résultat plutôt négatif avec {str(percentage_negatif)}% des cartes!!"    
+        return f"Résultat plutôt négatif avec {str(percentage_negatif)}% des cartes!!"
 
     return "Il ya un equilibre dans votre tirage!"
 
- 
+
 def _average_result_card(chosed_card_deck):
     """
-    calcul and return the response card.             
+    calcul and return the response card.
     """
 
     list_of_cards_ids = []
     for card in chosed_card_deck:
-        card = MajorArcana.objects.get(card_name=card)
+        card = MajorArcana.objects.get(card_name_fr=card)
         list_of_cards_ids.append(card.id)
 
-    mean_card = round(sum(list_of_cards_ids)/len(list_of_cards_ids), 2)
+    mean_card = round(sum(list_of_cards_ids) / len(list_of_cards_ids), 2)
 
-    return MajorArcana.objects.get(id = mean_card)
+    return MajorArcana.objects.get(id=mean_card)
+
 
 # construire tableau
 def _splitBy(li, n=1):
@@ -89,12 +89,12 @@ def _create_cards_message(card, chosed_theme):
         + "this.src='/static/img/cards/Back.jpg'"
         + " alt=''/>"
         + "<span><p>"
-        + card.card_name.capitalize()
+        + card.card_name_fr.capitalize()
         + "</p>"
         + "<p>"
         + "Mise en Garde!"
         + "</p>"
-        + card.card_signification_warnings
+        + card.card_signification_warnings_fr
         + "<p>"
         + "ce que signifie la carte!"
         + "</p>"
@@ -105,12 +105,11 @@ def _create_cards_message(card, chosed_theme):
 
 
 def create_final_response(list_of_cards, name, list_of_polarity):
-    """ 
+    """
     Construct the cards board and generate the response heads tittle.
     """
 
     column = 6
-
 
     card_board = _splitBy(list_of_cards, column)
 
@@ -144,20 +143,18 @@ def create_final_response(list_of_cards, name, list_of_polarity):
 
 def clairvoyante_sort_cards(name, chosed_card_deck, chosed_theme):
     """
-        Construct the last response of sorted cards.
+    Construct the last response of sorted cards.
     """
     list_of_cards = []
     list_of_polarity = []
 
     for card in chosed_card_deck:
-        card = MajorArcana.objects.get(card_name=card)
+        card = MajorArcana.objects.get(card_name_fr=card)
         list_of_polarity.append(card.card_polarity)
         message_card = _create_cards_message(card, chosed_theme)
         list_of_cards.append(message_card)
 
-    final = create_final_response(
-        list_of_cards, name, list_of_polarity
-    )
+    final = create_final_response(list_of_cards, name, list_of_polarity)
 
     response = response_card(name, chosed_card_deck, chosed_theme)
 

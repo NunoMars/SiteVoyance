@@ -29,7 +29,7 @@ SECRET_KEY = "\\\ta(xZQ;xUIly1X@IGT:4re$"
 
 DEBUG = "PROD" not in os.environ
 
-ALLOWED_HOSTS = ['nunomars-server.eddi.cloud', 'localhost']
+ALLOWED_HOSTS = ["nunomars-server.eddi.cloud", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -68,9 +68,7 @@ EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = True
 EMAIL_PORT = 587
 # EMAIL_PORT_SSL = 465
-EMAIL_HOST_USER = (
-    "patricia.nunes.tarot@gmail.com"  # os.environ.get("EMAIL_HOST_USER")
-)
+EMAIL_HOST_USER = "patricia.nunes.tarot@gmail.com"  # os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = "Ruben1Mara2"  # os.environ.get("EMAIL_HOST_PASSWORD")
 
 ###################################################
@@ -171,4 +169,3 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
