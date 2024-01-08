@@ -17,7 +17,7 @@
         <h1>{{card_name}}</h1>
     </div>       
     <div class="row-md mx-auto justify-content-center text-white align-items-center text-center">                                                
-        <div><a href="{{card_image.url}}"><img class="imagefloat pull-left rounded" width ="30%" src="{{card_image.url}}"></a>
+        <div><img class="imagefloat pull-left rounded" width="30%" src="{{card_image.url}}" alt="{{card_name}}"></div>
             {{card_signification_gen}}
             <h3>Les aspects negatifs de {{card_name}}</h3>
             {{card_signification_warnings}}
@@ -28,5 +28,4 @@
         </div>     
     </div>
 </section>
-
-{% endblock%}
+{% endblock body %}

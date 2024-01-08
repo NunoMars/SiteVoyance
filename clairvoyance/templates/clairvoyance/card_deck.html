@@ -1,6 +1,6 @@
 {% extends 'base.html'%}
 {% load static %}
- {% load i18n %}
+{% load i18n %}
 
 {% block title %}<title>{% trans "Mon tarot" %}</title>{% endblock %}
 
@@ -18,7 +18,7 @@
         {% for card in cards %}
             <div class="col-sm justify-content-center align-items-center text-center">    
                 <a href="{% url 'card_detail' card=card.id %}">                                                                    
-                    <img class="img-fluid rounded" src="{{card.card_image.url}}">                                
+                    <img class="img-fluid rounded" src="{{card.card_image.url}}">                          
                     <h6>{% if lang == 'fr' %}
                             {{card.card_name_fr}}
                         {% elif lang == 'pt' %}
