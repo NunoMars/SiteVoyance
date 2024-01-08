@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+venv
+.coverage
+.gitignore
+chromedriver.exe
+tests
+requirements.in
+runtime.txt
+README.md
