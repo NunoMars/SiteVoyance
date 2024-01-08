@@ -46,7 +46,7 @@ jobs:
     - name: Docker Image build and push to GitHub Container Registry
       uses: NunoMars/docker_image_repo@v1.0
       with:
-        image_name: 'site-voyance'
+        image: 'site-voyance'
         tag: ${{ github.ref_slug }}
         context: '.'
         github-token: ${{ secrets.GITHUB_TOKEN}}
