@@ -25,10 +25,11 @@ Welcome to the infrastructure documentation for our project! 🚀 This guide pro
 
 ## Deployment Workflow
 
-Our deployment workflow automates the setup and configuration of each component. Using GitHub Actions, we launch LXD containers, configure services, and deploy our application seamlessly. The workflow ensures consistency and repeatability in our deployment process.
+Our deployment workflow automates the setup and configuration of each component. Using GitHub Actions, create a Docker image, configure services, and deploy our application seamlessly. The workflow ensures consistency and repeatability in our deployment process.
 
 ## Getting Started
 
 Whether you're a new contributor or setting up the project locally, the documentation provides step-by-step instructions to replicate our infrastructure. Dive in and explore the architecture that powers our application.
 
 Feel free to reach out if you have any questions or suggestions. Happy coding! 🚀
+
