@@ -1,3 +1,7 @@
 venv
 db.sqlite3
+__pycache__/
+accounts\_pycache__
+ball8\_pycache__
+clairvoyance\_pycache__
 
