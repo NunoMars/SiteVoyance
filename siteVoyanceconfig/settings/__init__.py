@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
-
 import os
 from pathlib import Path
 
@@ -31,6 +30,16 @@ DEBUG = "PROD" not in os.environ
 
 ALLOWED_HOSTS = ["nunomars-server.eddi.cloud", "localhost", "127.0.0.1"]
 
+ASGI_APPLICATION = "siteVoyanceconfig.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Application definition
 
@@ -46,6 +55,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "import_export",
     "responses.apps.ResponsesConfig",
+    "channels",
 ]
 
 ##################################################

@@ -18,5 +18,5 @@ tzdata
 whitenoise
 xlrd
 xlwt
-pip-tools
-gunicorn
+channels
+daphne

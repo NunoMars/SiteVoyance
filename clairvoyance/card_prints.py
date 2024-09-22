@@ -117,7 +117,7 @@ def create_final_response(list_of_cards, name, list_of_polarity):
     for i in card_board:
         l = "".join(i)
         final_card_deck.append(
-            "<div class='row' height= '100%' text-align='center'>" + l + "</div>"
+            f"<div class='row' height= '100%' text-align='center'>{l}</div>"
         )
 
     f = "".join(final_card_deck)
@@ -125,7 +125,7 @@ def create_final_response(list_of_cards, name, list_of_polarity):
     polarity = polarity_calcul(list_of_polarity)
 
     return {
-        "final_response_tittle": "<div class='col'><div class='cta-inner text-center rounded'>"
+        "display_deck_cards": "<div class='col'><div class='cta-inner text-center rounded'>"
         + "<h4>"
         + name.capitalize()
         + " vois-ci votre réponse!"
@@ -134,7 +134,7 @@ def create_final_response(list_of_cards, name, list_of_polarity):
         + polarity
         + "</h4>"
         + "<h6>"
-        + "Afin de voir les mises en garde, survolez la carte avec la souris..."
+        + "Choisissez 5 cartes pour que je puisse vous repondre"
         + "</h6>"
         + f
         + "</div>"

@@ -57,7 +57,7 @@ packaging==23.2
     # via
     #   build
     #   gunicorn
-pillow==10.1.0
+pillow==10.4.0
     # via -r requirements.in
 pip-tools==7.3.0
     # via -r requirements.in
@@ -95,7 +95,11 @@ xlwt==1.3.0
     # via
     #   -r requirements.in
     #   tablib
-
-# The following packages are considered to be unsafe in a requirements file:
-# pip
-# setuptools
+python-dotenv
+channels==3.0.4
+channels_redis
+daphne
+langchain
+mistral
+PyPDF2
+faiss-cpu

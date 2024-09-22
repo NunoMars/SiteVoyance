@@ -1,11 +1,10 @@
-import contextlib
 from django.shortcuts import render
-from django.http import JsonResponse
+
 from django.contrib.auth.decorators import login_required
 
 from clairvoyance.logic import clairvoyant
 from .models import MajorArcana
-from accounts.models import CustomUser, History, DailySortedCards
+from accounts.models import History, DailySortedCards
 from django.views.generic.base import TemplateView
 from django.views import View
 
@@ -71,15 +70,6 @@ class CardDetailView(View):
             return render(request, self.template_name, card_data)
         else:
             return render(request, "clairvoyance/card_not_found.html")
-
-
-def clairvoyante(request):
-    if request.method != "POST":
-        return
-    with contextlib.suppress(ValueError):
-        input_value = request.POST.get("messageInput")
-        result = clairvoyant(input_value, request.LANGUAGE_CODE)
-        return JsonResponse(result)
 
 
 @login_required

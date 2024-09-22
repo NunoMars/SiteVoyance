@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
+from clairvoyance.consumers import ClairvoyanteConsumer
 from clairvoyance.views import IndexView, contacts
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,3 +18,7 @@ urlpatterns = [
 
 if "rosetta" in settings.INSTALLED_APPS:
     urlpatterns += [re_path(r"^rosetta/", include("rosetta.urls"))]
+
+websocket_urlpatterns = [
+    re_path(r"ws/clairvoyante/$", ClairvoyanteConsumer.as_asgi()),
+]
