@@ -1,6 +1,6 @@
 import os
 import PyPDF2
-from langchain.embeddings import MistralEmbeddings
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import faiss
 import numpy as np
 from dotenv import load_dotenv
@@ -9,43 +9,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# Étape 1 : Lire le fichier PDF et extraire le texte
-def extract_text_from_pdf(pdf_path):
-    pdf_reader = PyPDF2.PdfFileReader(open(pdf_path, "rb"))
-    text = ""
-    for page_num in range(pdf_reader.numPages):
-        page = pdf_reader.getPage(page_num)
-        text += page.extract_text()
-    return text
+class CreateVectors:
+    """ Cretes vectors from a PDF file"""
+    
+    def __init__(self, pdf_path):
+        self.pdf_path = pdf_path
 
+    def extract_text_from_pdf(self):
+        pdf_reader = PyPDF2.PdfReader(open(self.pdf_path, "rb"))
+        text = ""
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            text += page.extract_text()
+        return text
 
-# Étape 2 : Utiliser LangChain pour transformer le texte en vecteurs
-def text_to_vectors(text, api_key):
-    embeddings = MistralEmbeddings(api_key=api_key)
-    return embeddings.embed_text(text)
+    def text_to_vectors(self, text):
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        return embeddings.embed_text(text)
 
+    def index_vectors(self, vectors):
+        dimension = vectors.shape[1]
+        index = faiss.IndexFlatL2(dimension)
+        index.add(vectors)
+        return index
 
-# Étape 3 : Indexer les vecteurs avec FAISS
-def index_vectors(vectors):
-    dimension = vectors.shape[1]
-    index = faiss.IndexFlatL2(dimension)
-    index.add(vectors)
-    return index
-
-
-# Chemin vers le fichier PDF
-pdf_path = "TarotModeEmploi.pdf"
-
-# Votre clé API Mistral
-api_key = os.getenv("MISTRAL_API_KEY")
-
-# Extraire le texte du PDF
-text = extract_text_from_pdf(pdf_path)
-
-# Convertir le texte en vecteurs
-vectors = text_to_vectors(text, api_key)
-
-# Indexer les vecteurs avec FAISS
-index = index_vectors(np.array(vectors))
-
-print("Indexation terminée.")
+    def create_index(self):
+        text = self.extract_text_from_pdf()
+        vectors = self.text_to_vectors(text)
+        index = self.index_vectors(np.array(vectors))
+        print("indexation terminée.")      
+        return index

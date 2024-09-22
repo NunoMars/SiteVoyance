@@ -37,8 +37,6 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.in
     #   openpyxl
-gunicorn==21.2.0
-    # via -r requirements.in
 import-export==0.3.1
     # via -r requirements.in
 markuppy==1.14
@@ -61,7 +59,7 @@ pillow==10.4.0
     # via -r requirements.in
 pip-tools==7.3.0
     # via -r requirements.in
-psycopg2==2.9.9
+psycopg2-binary
     # via -r requirements.in
 pyproject-hooks==1.0.0
     # via build
@@ -100,6 +98,9 @@ channels==3.0.4
 channels_redis
 daphne
 langchain
+langchain-community
+sentence-transformers
 mistral
 PyPDF2
 faiss-cpu
+websockets

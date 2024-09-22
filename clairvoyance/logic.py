@@ -3,7 +3,9 @@ import faiss
 import numpy as np
 import asyncio
 import websockets
-from langchain.embeddings import MistralEmbeddings
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from .tools.convert_vector import CreateVectors
+
 from dotenv import load_dotenv
 from .models import MajorArcana
 
@@ -21,7 +23,11 @@ if not api_key:
 
 # Charger l'index FAISS
 def load_index(index_path):
-    return faiss.read_index(index_path)
+    try:
+        index_path = faiss.read_index(index_path)
+    except:
+        index_path = CreateVectors("clairvoyance/data/Tarot.pdf").create_index()
+    return index_path
 
 
 # Rechercher des vecteurs similaires
@@ -31,8 +37,8 @@ def search_vectors(index, query_vector, k=5):
 
 
 # Utiliser LangChain pour transformer le texte en vecteurs
-def text_to_vector(text, api_key):
-    embeddings = MistralEmbeddings(api_key=api_key)
+def text_to_vector(text):
+    embeddings =  HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     return np.array(embeddings.embed_text(text)).reshape(1, -1)
 
 
