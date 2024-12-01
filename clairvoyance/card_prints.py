@@ -117,7 +117,7 @@ def create_final_response(list_of_cards, name, list_of_polarity):
     for i in card_board:
         l = "".join(i)
         final_card_deck.append(
-            "<div class='row' height= '100%' text-align='center'>" + l + "</div>"
+            f"<div class='row' height= '100%' text-align='center'>{l}</div>"
         )
 
     f = "".join(final_card_deck)
