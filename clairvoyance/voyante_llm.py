@@ -65,7 +65,15 @@ def voyante_chatbot(input_value):
             MajorArcana.objects.get(card_name_fr=card).card_text()
             for card in cards_list
         ]
+        queryset = MajorArcana.objects.filter(card_name_fr__in=cards_list)
 
+        cards = [
+            {
+                "name": card.card_name_fr,
+                "image_url": card.card_image.url,
+            }
+            for card in queryset
+        ]
         # Prepare the full text for the API
         full_text = "Tirage en croix:\n" + "\n".join(cards_text)
         logger.debug(f"Full text: {full_text}")
@@ -129,7 +137,11 @@ def voyante_chatbot(input_value):
         # Use AIMessage to structure the response
         ai_message = AIMessage(content=prediction)
         print(ai_message.content)
-        return {"subject": "prediction", "predictions": [ai_message.content]}
+        return {
+            "subject": "prediction",
+            "predictions": [ai_message.content],
+            "cards": cards,
+        }
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")

@@ -52,7 +52,7 @@ def clairvoyant(input_value):
     input_value = json.loads(input_value)
     if input_value["subject"] == "name":
         user_name = input_value["name"]
-        return {"subject": "menu", "user_name": user_name}
+        return {"subject": "cut", "user_name": user_name}
 
     elif input_value["subject"] == "Yes":
         return {"subject": "menu", "user_name": user_name}

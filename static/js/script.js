@@ -110,7 +110,10 @@ function getMessageClairvoyant(msg) {
             }
             if (data.subject == "prediction") {
                 $('.message.loading').remove();
+                displayChosenCards(data.cards);
+                $('.message.loading').remove();               
                 clairvoyantMessage(data.predictions);
+                              
             }
 
             if (data.subject == "No") {
@@ -228,7 +231,6 @@ function menuChoices(data) {
     updateScrollbar();
 };
 
-const selectedCards = [];
 
 function proposeToChoose(deck_data) {
     if (!deck_data || deck_data.length === 0) {
@@ -236,6 +238,7 @@ function proposeToChoose(deck_data) {
         return;
     }
 
+    let selectedCards = [];
     let cardsHtml = `
         <div id="cards-container" style="display: flex; flex-direction: column; align-items: center;">
             <p><h5>Veuillez sélectionner 5 cartes pour révéler les mystères de votre avenir.</h5></p>
@@ -288,33 +291,32 @@ function proposeToChoose(deck_data) {
      $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 }
-function displayChosenCards() {
-    if (selectedCards.length !== 5) {
-        console.error("Exactly 5 cards are required.");
+function displayChosenCards(cards) {
+    if (!cards || cards.length === 0) {
+        console.error("No cards to display.");
         return;
     }
-
     let displayHtml = `
         <div class='cta-inner text-center rounded'>
             <div class='row'>
                 <div class='col'>
-                    <img class='img-fluid card' src='${selectedCards[2].image_url}' alt='${escapeHtml(selectedCards[2].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <img class='card' src='${cards[2].image_url}' alt='${escapeHtml(cards[2].name)}' style='width: 100px; height: 150px; margin: 10px;'>
                 </div>
             </div>
             <div class='row'>
                 <div class='col'>
-                    <img class='img-fluid card' src='${selectedCards[0].image_url}' alt='${escapeHtml(selectedCards[0].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <img class='card' src='${cards[0].image_url}' alt='${escapeHtml(cards[0].name)}' style='width: 100px; height: 150px; margin: 10px;'>
                 </div>
                 <div class='col'>
-                    <img class='img-fluid card' src='${selectedCards[4].image_url}' alt='${escapeHtml(selectedCards[4].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <img class='card' src='${cards[4].image_url}' alt='${escapeHtml(cards[4].name)}' style='width: 100px; height: 150px; margin: 10px;'>
                 </div>
                 <div class='col'>
-                    <img class='img-fluid card' src='${selectedCards[1].image_url}' alt='${escapeHtml(selectedCards[1].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <img class='card' src='${cards[1].image_url}' alt='${escapeHtml(cards[1].name)}' style='width: 100px; height: 150px; margin: 10px;'>
                 </div>
             </div>
             <div class='row'>
                 <div class='col'>
-                    <img class='img-fluid card' src='${selectedCards[3].image_url}' alt='${escapeHtml(selectedCards[3].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <img class='img-fluid card' src='${cards[3].image_url}' alt='${escapeHtml(cards[3].name)}' style='width: 100px; height: 150px; margin: 10px;'>
                 </div>
             </div>
         </div>
