@@ -67,7 +67,6 @@ class CardDetailView(View):
     def get(self, request, card):
         queryset = self.get_queryset()
         if card_data := queryset.filter(id=card).first():
-            print(card_data)
             return render(request, self.template_name, card_data)
         else:
             return render(request, "clairvoyance/card_not_found.html")
@@ -78,7 +77,7 @@ def clairvoyante(request):
         return
     with contextlib.suppress(ValueError):
         input_value = request.POST.get("messageInput")
-        result = clairvoyant(input_value, request.LANGUAGE_CODE)
+        result = clairvoyant(input_value)
         return JsonResponse(result)
 
 

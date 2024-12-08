@@ -1,63 +1,77 @@
-from .card_prints import clairvoyante_sort_cards
 from .models import LeftDeck, MajorArcana, RightDeck
 from .prepare_decks_cards import prepare_decks
+from .voyante_llm import voyante_chatbot
+import json
 
 
-def _extracted_from_clairvoyant_64(arg0):
+def send_cards_choosed_deck_to_user(arg0):
+    """
+    Send the cards choosed by the user to the user.
+    """
     deck = arg0.objects.all()
-    final_tarot_response = clairvoyante_sort_cards(
-        user_name, deck, chosed_theme
-    )
+
+    # requeter dans MajorArcana pour avoir les images
+
+    def _get_cards_from_majorarcana_table(deck):
+        """
+        Get the cards from the MajorArcana table.
+        """
+
+        cards_ids = [card.card_id_id for card in deck]
+
+        cards = MajorArcana.objects.filter(id__in=cards_ids)
+
+        return cards
+
+    deck = _get_cards_from_majorarcana_table(deck)
+
+    deck_data = [
+        {
+            "name": card.card_name_fr,
+            "image_url": card.card_image.url,
+        }
+        for card in deck
+    ]
+
     return {
-        "subject": "final_response",
-        "message": final_tarot_response[0],
+        "subject": "propose to choose five cards",
+        "message": deck_data,
     }
 
 
-def clairvoyant(input_value, lang):
+def clairvoyant(input_value):
     """
     Construct the bot response.
     """
     global user_name
     global chosed_theme
 
-    list_of_words = [
-        "one",
-        "cut",
-        "Quit",
-        "love",
-        "work",
-        "gen",
-        "left",
-        "right",
-        "Yes",
-        "No",
-    ]
-
     rand_card = MajorArcana.objects.order_by("?")[0]
 
-    if input_value not in list_of_words:
-        user_name = input_value
+    print(f"Mesage envoyé de puis la view: {input_value}")
+    input_value = json.loads(input_value)
+    if input_value["subject"] == "name":
+        user_name = input_value["name"]
         return {"subject": "menu", "user_name": user_name}
 
-    elif input_value == "Yes":
+    elif input_value["subject"] == "Yes":
         return {"subject": "menu", "user_name": user_name}
 
-    elif input_value == "No":
+    elif input_value["subject"] == "No":
         return {
             "subject": "No",
             "message": "Merci j'ai été ravie de vous aider!!",
         }
 
-    elif input_value == "one":
-        return _get_response_one_card(rand_card, lang)
+    elif input_value["subject"] == "one":
+        return _get_response_one_card(rand_card)
 
-    elif input_value in ["love", "work", "gen", "one"]:
+    elif input_value["subject"] in ["love", "work", "gen", "one"]:
         chosed_theme = input_value
 
         return {"subject": "cut", "user_name": user_name}
 
-    elif input_value == "cut":
+    elif input_value["subject"] == "cut":
 
         decks = prepare_decks()
         len_left_deck = decks[0].count()
@@ -68,41 +82,22 @@ def clairvoyant(input_value, lang):
             "len_right_deck": str(len_right_deck),
         }
 
-    elif input_value == "left":
-        return _extracted_from_clairvoyant_64(LeftDeck)
+    elif input_value["subject"] == "left":
+        return send_cards_choosed_deck_to_user(LeftDeck)
 
-    elif input_value == "right":
-        return _extracted_from_clairvoyant_64(RightDeck)
+    elif input_value["subject"] == "right":
+        return send_cards_choosed_deck_to_user(RightDeck)
+
+    return voyante_chatbot(input_value)
 
 
-def _get_response_one_card(rand_card, lang):
-    if lang == "en":
-        card_name = rand_card.card_name_en
-        card_signification_warnings = rand_card.card_signification_warnings_en
-        card_signification_love = rand_card.card_signification_love_en
-        card_signification_work = rand_card.card_signification_work_en
-        card_signification_gen = rand_card.card_signification_gen_en
+def _get_response_one_card(rand_card):
 
-    elif lang == "fr":
-        card_name = rand_card.card_name_fr
-        card_signification_warnings = rand_card.card_signification_warnings_fr
-        card_signification_love = rand_card.card_signification_love_fr
-        card_signification_work = rand_card.card_signification_work_fr
-        card_signification_gen = rand_card.card_signification_gen_fr
-
-    elif lang == "pt":
-        card_name = rand_card.card_name_pt
-        card_signification_warnings = rand_card.card_signification_warnings_pt
-        card_signification_love = rand_card.card_signification_love_pt
-        card_signification_work = rand_card.card_signification_work_pt
-        card_signification_gen = rand_card.card_signification_gen_pt
-
-    elif lang == "es":
-        card_name = rand_card.card_name_es
-        card_signification_warnings = rand_card.card_signification_warnings_es
-        card_signification_love = rand_card.card_signification_love_es
-        card_signification_work = rand_card.card_signification_work_es
-        card_signification_gen = rand_card.card_signification_gen_es
+    card_name = rand_card.card_name_fr
+    card_signification_warnings = rand_card.card_signification_warnings_fr
+    card_signification_love = rand_card.card_signification_love_fr
+    card_signification_work = rand_card.card_signification_work_fr
+    card_signification_gen = rand_card.card_signification_gen_fr
 
     return {
         "subject": "one_card",

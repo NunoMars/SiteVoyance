@@ -20,3 +20,10 @@ xlrd
 xlwt
 pip-tools
 gunicorn
+mistralai
+python-dotenv
+langchain
+langchain_community
+langchain_mistralai
+langchain_huggingface
+faiss-cpu

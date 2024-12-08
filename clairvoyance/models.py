@@ -12,43 +12,29 @@ class MajorArcana(models.Model):
     )
 
     card_name_fr = models.CharField(max_length=50)
-    card_name_pt = models.CharField(default="pt", max_length=50)
-    card_name_en = models.CharField(default="en", max_length=50)
-    card_name_es = models.CharField(default="es", max_length=50)
 
     card_signification_gen_fr = models.TextField(default="fr")
-    card_signification_gen_pt = models.TextField(default="pt")
-    card_signification_gen_en = models.TextField(default="en")
-    card_signification_gen_es = models.TextField(default="es")
 
     card_signification_warnings_fr = models.TextField(default="fr")
-    card_signification_warnings_pt = models.TextField(default="pt")
-    card_signification_warnings_en = models.TextField(default="en")
-    card_signification_warnings_es = models.TextField(default="es")
 
     card_signification_love_fr = models.TextField(default="fr")
-    card_signification_love_pt = models.TextField(default="pt")
-    card_signification_love_en = models.TextField(default="en")
-    card_signification_love_es = models.TextField(default="es")
 
     card_signification_work_fr = models.TextField(default="fr")
-    card_signification_work_pt = models.TextField(default="pt")
-    card_signification_work_en = models.TextField(default="en")
-    card_signification_work_es = models.TextField(default="es")
 
     card_image = models.ImageField(upload_to="MajorArcanaCards")
-    card_polarity = models.CharField(
-        max_length=10, choices=CHOICES, default="Positif"
-    )
+    card_polarity = models.CharField(max_length=10, choices=CHOICES, default="Positif")
+
+    card_text_summarized = models.TextField(default="none")
+
+    def card_text(self):
+        return f"{self.card_signification_gen_fr} {self.card_signification_love_fr} {self.card_signification_work_fr} {self.card_signification_warnings_fr}"
 
     def __str__(self):
         return self.card_name_fr
 
     def image_tag(self):
 
-        return mark_safe(
-            '<img src="%s" width="75" height="75" />' % (self.card_image)
-        )
+        return mark_safe('<img src="%s" width="75" height="75" />' % (self.card_image))
 
     image_tag.short_description = "Image"
 
