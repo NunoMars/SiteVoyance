@@ -123,6 +123,7 @@ function getMessageClairvoyant(msg) {
                 clairvoyantMessage(data.message); 
                 RedirectionJavascript();
             }
+            clairvoyantMessage(data.message);
         },
     });
 };
