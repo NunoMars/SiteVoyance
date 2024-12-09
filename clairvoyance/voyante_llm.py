@@ -1,6 +1,7 @@
 import os
 import logging
 import time
+import json
 
 from django.contrib.sessions.models import Session
 from langchain_mistralai.chat_models import ChatMistralAI
@@ -99,14 +100,17 @@ def voyante_chatbot(input_value):
         # Define the prompt template
         prompt = ChatPromptTemplate.from_template(
             """
-            Comme Mme T tarologue, tu dois répondre aux questions des clients sur leur avenir en utilisant les cartes de tarot fournies dans le contexte et avec tout ce que tu connais sur la disposition en croix et les significations des cartes entre elles:
-            signification de la première carte
+            Comme Mme T tarologue, tu dois répondre aux questions des clients sur leur avenir en utilisant les cartes de tarot fournies dans le contexte et avec tout ce que tu connais sur la disposition en croix et les significations des cartes entre elles. 
+            voici comment liore une tirage en croix:
+            Comment lire les cartes en croix ?
+            Dans le tirage en croix, chaque carte a une place et une signification prédéfinie. Ainsi, il est important de bien les positionner selon l’ordre dans lesquelles on les tire. La première carte va tout à gauche. La seconde, tout à droite. En haut, ira la troisième carte, en bas, la quatrième. Et, enfin, au milieu, on retrouvera la dernière carte. Voici un modèle pour vous aider à vous repérer. 
+            Tirage en croix : signification de la première carte
             La première carte représente votre situation. Elle met en lumière votre état d’esprit, votre personnalité, ce qui est en train de se passer au moment où vous tirez les cartes. Comment se présente la situation ? Quelle est la conjoncture ? Selon l’arcane qui sort, il peut s’agir de quelque chose de positif ou, au contraire, de plutôt négatif. Par chance, les prochaines cartes vous aideront à dénouer tout cela en vous donnant les clés nécessaires pour améliorer ou faire évoluer votre situation. En réalité, toutes les arcanes possèdent du positif ou du négatif. Tout dépend de leur place dans le tirage et de l’état d’esprit du consultant. Dans certains cas, la première carte d’un tirage en croix peut également représenter le consultant. 
 
-            interprétation de la deuxième carte
+            Tirage en croix : interprétation de la deuxième carte
             Après avoir posé les bases de la situation, il est important d’en comprendre les tenants et les aboutissants. La seconde carte est là pour vous montrer les difficultés, les aspects négatifs et les obstacles potentiels qui peuvent se présenter à vous. Par exemple, dans le cadre d’un tirage sentimental, il peut s’agir d’une carte qui nous parle de jalousie ou d’instabilité. Il faudra donc surmonter ce potentiel problème afin d’avancer, ou du moins, en tenir compte pour comprendre la situation dans son ensemble. Cela n’est pas forcément négatif. Il peut arriver qu’une carte lumineuse se présente à vous. Dans ce cas, le tirage vous révèle quels sont vos appuis, vos soutiens, les forces sur lesquelles travailler pour évoluer. Dans les deux cas, il s’agit d’une étape à passer pour transformer le présent. Rappelons que tout doit venir de vous. Cette carte est donc là pour vous montrer quelle part de votre personnalité est challenger dans cette situation. 
 
-            que représente le troisième arcane ? 
+            Tirage en croix : que représente le troisième arcane ? 
             La troisième carte symbolise les évènements. Elle vous révèle votre futur proche. Que peut-il se passer qui risque de transformer votre situation, de changer votre quotidien. Attention, il ne faut pas s’attendre à de grands bouleversements, cela peut être quelque chose de discret comme un message que l’on reçoit ou une personne que l’on croise. Que l’arcane sélectionnée soit positive ou négative, dans les deux cas, elle vous invitera à vous ouvrir au monde. Restez attentive, observez, soyez prête à intercepter les signes de l’Univers. Bien souvent, il arrive que l’on ne se rende pas compte de ce qu’il se passe. On peut donc avoir l'impression que rien n’arrive alors qu’un événement a bien eu lieu. Pas de panique donc si dans les prochains jours, prochaines semaines ou même prochains mois, vous ne voyez rien. N’attendez rien, ne précipitez rien. Faites-vous seulement confiance.
 
             La signification de la quatrième carte dans un tirage en croix
@@ -114,15 +118,39 @@ def voyante_chatbot(input_value):
 
             La cinquième carte du tirage en croix
             La dernière carte du tirage en croix est une sorte de carte bonus. Elle résume la situation, vous dresse une synthèse de tout ce que les autres arcanes ont pu et su vous dire. Servez-vous en comme d’un bilan. Voici ce qui se présente à vous. Voilà quel est votre défi. Une fois de plus, il s’agit ici de faire une petite introspection. Quelles sont les choses que vous avez appris sur vous, sur votre combativité, sur vos désirs, vos envies ? Que retenez-vous de ce tirage ? La dernière carte vous renvoie face à votre propre image pour vous montrer que vous êtes la seule personne capable de transformer votre destin. Pourquoi la situation est-elle ainsi ? Quelles leçons, quels conseils, les cartes et ce tirage peuvent vous apprendre pour sortir grandie de tout cela ? On vous conseille de prendre votre temps pour bien prendre le temps d’analyser et d’interpréter le tirage. Sortez une feuille et un stylo et notez tout ce qui vous vient en tête. Quels messages apparaissent ? Écoutez votre intuition, restez au fait de vos émotions, de vos ressentis. Ce sont eux qui vous guideront vers la solution. 
-            
-            tu dois envoyer une vue d'enssemble et carte par carte pour les cinq cartes, ensuite tu dois donner une prédiction basée sur le tirage des cartes et reponde aux questions que l'user te pose
-            reponses uniquement en français
+            Tu dois fournir une réponse uniquement en JSON strictement valide sans texte ou annotation autour. Le format doit correspondre à cet exemple exact :
+
+            {{
+                "carte1": {{
+                    "nom": "La Situation",
+                    "signification": "Mise en lumière de l’état d’esprit et de la personnalité, représentant la conjoncture actuelle. Peut être positive ou négative selon l’arcane."
+                }},
+                "carte2": {{
+                    "nom": "Les Difficultés",
+                    "signification": "Révélation des aspects négatifs, des obstacles potentiels ou des soutiens, mettant en avant une part de la personnalité à challenger."
+                }},
+                "carte3": {{
+                    "nom": "Les Événements",
+                    "signification": "Symbolisation des événements à venir qui peuvent transformer la situation, invitant à rester attentif et ouvert au monde."
+                }},
+                "carte4": {{
+                    "nom": "La Réponse",
+                    "signification": "Apport d’une solution ou d’un éclairage sur ce qui risque de se passer, influencé par les décisions du consultant."
+                }},
+                "carte5": {{
+                    "nom": "La Synthèse",
+                    "signification": "Résumé de la situation et bilan pour guider le consultant face à son propre destin et ses propres choix."
+                }},
+                "prediction": "Une prédiction basée sur l’ensemble des cartes tirées, tenant compte de leur position et de leur signification.",
+                "reponse": "Une réponse personnalisée basée sur la question posée et les cartes tirées."
+            }}
+
             <context>
             {context}
             </context>
 
             Question: {input}
-            """
+        """
         )
 
         # Create the document and retrieval chains
@@ -136,7 +164,23 @@ def voyante_chatbot(input_value):
 
         # Use AIMessage to structure the response
         ai_message = AIMessage(content=prediction)
-        print(ai_message.content)
+
+        # Vérifiez si la réponse est vide ou mal formée
+        if not ai_message.content:
+            raise ValueError("Empty response from the model")
+
+        ai_message_escape = ai_message.content.replace("\\", "")
+        # Parse the JSON response
+        try:
+            response_dict = json.loads(ai_message_escape)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON response: {e}")
+            raise ValueError("Invalid JSON response from the model") from e
+
+        # Access keys and values
+        for key, value in response_dict.items():
+            print(f"{key}: {value}")
+
         return {
             "subject": "prediction",
             "predictions": [ai_message.content],

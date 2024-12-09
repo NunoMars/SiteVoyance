@@ -55,6 +55,10 @@ function insertMessage() {
 }
 
 function escapeHtml(msg) {
+    if (typeof msg !== 'string') {
+        console.error("Invalid value passed to escapeHtml:", msg);
+        return '';
+    }
     return msg
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -75,7 +79,7 @@ function getMessageClairvoyant(msg) {
             messageInput: msg,
         },
         success: function (data) {
-            $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+            $('.message.loading').remove();
             updateScrollbar();
             if (data.subject == "menu") {
                 $('.message.loading').remove();
@@ -110,8 +114,7 @@ function getMessageClairvoyant(msg) {
             }
             if (data.subject == "prediction") {
                 $('.message.loading').remove();
-                displayChosenCards(data.cards);
-                $('.message.loading').remove();               
+                displayChosenCards(data);             
                 clairvoyantMessage(data.predictions);
                               
             }
@@ -291,39 +294,74 @@ function proposeToChoose(deck_data) {
      $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 }
-function displayChosenCards(cards) {
+function displayChosenCards(data) {
+    let {cards, predictions} = data;
     if (!cards || cards.length === 0) {
         console.error("No cards to display.");
         return;
     }
+    if (!predictions) {
+        console.error("No predictions to display.");
+        return;
+    }
+
     let displayHtml = `
-        <div class='cta-inner text-center rounded'>
+        <div class='text-center'>
             <div class='row'>
                 <div class='col'>
-                    <img class='card' src='${cards[2].image_url}' alt='${escapeHtml(cards[2].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col'>
+                    <h5>${escapeHtml(cards[0].name)}</h5>
+                    <h6>${escapeHtml(predictions.carte1?.nom || "Nom non disponible")}</h6>
                     <img class='card' src='${cards[0].image_url}' alt='${escapeHtml(cards[0].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                </div>
-                <div class='col'>
-                    <img class='card' src='${cards[4].image_url}' alt='${escapeHtml(cards[4].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                </div>
-                <div class='col'>
-                    <img class='card' src='${cards[1].image_url}' alt='${escapeHtml(cards[1].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <p>${escapeHtml(predictions.carte1?.signification || "Signification non disponible")}</p>
                 </div>
             </div>
             <div class='row'>
                 <div class='col'>
-                    <img class='img-fluid card' src='${cards[3].image_url}' alt='${escapeHtml(cards[3].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <h5>${escapeHtml(cards[1].name)}</h5>
+                    <h6>${escapeHtml(predictions.carte2?.nom || "Nom non disponible")}</h6>
+                    <img class='card' src='${cards[1].image_url}' alt='${escapeHtml(cards[1].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <p>${escapeHtml(predictions.carte2?.signification || "Signification non disponible")}</p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <h5>${escapeHtml(cards[2].name)}</h5>
+                    <h6>${escapeHtml(predictions.carte3?.nom || "Nom non disponible")}</h6>
+                    <img class='card' src='${cards[2].image_url}' alt='${escapeHtml(cards[2].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <p>${escapeHtml(predictions.carte3?.signification || "Signification non disponible")}</p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <h5>${escapeHtml(cards[3].name)}</h5>
+                    <h6>${escapeHtml(predictions.carte4?.nom || "Nom non disponible")}</h6>
+                    <img class='card' src='${cards[3].image_url}' alt='${escapeHtml(cards[3].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <p>${escapeHtml(predictions.carte4?.signification || "Signification non disponible")}</p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <h5>${escapeHtml(cards[4].name)}</h5>
+                    <h6>${escapeHtml(predictions.carte5?.nom || "Nom non disponible")}</h6>
+                    <img class='card' src='${cards[4].image_url}' alt='${escapeHtml(cards[4].name)}' style='width: 100px; height: 150px; margin: 10px;'>
+                    <p>${escapeHtml(predictions.carte5?.signification || "Signification non disponible")}</p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <h5>Prédiction</h5>
+                    <p>${escapeHtml(predictions.prediction || "Prédiction non disponible")}</p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <h5>Réponse à la question</h5>
+                    <p>${escapeHtml(predictions.reponse || "Réponse non disponible")}</p>
                 </div>
             </div>
         </div>
     `;
-
-    clairvoyantMessage(displayHtml);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+    document.querySelector('.mCSB_container').innerHTML += displayHtml;
     updateScrollbar();
 }
 
