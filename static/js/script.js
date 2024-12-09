@@ -115,8 +115,7 @@ function getMessageClairvoyant(msg) {
             if (data.subject == "prediction") {
                 $('.message.loading').remove();
                 displayChosenCards(data);             
-                clairvoyantMessage(data.predictions);
-                              
+                clairvoyantMessage("À présent, vous pouvez me poser toutes les questions sur tous les domaines que vous souhaitez. Je me baserai sur votre tirage pour y répondre");                              
             }
 
             if (data.subject == "No") {
@@ -304,66 +303,87 @@ function displayChosenCards(data) {
         console.error("No predictions to display.");
         return;
     }
+    console.log(cards);
+    console.log(predictions[0]);
 
     let displayHtml = `
-        <div class='text-center'>
+        <div class='cta-inner text-center rounded'>
             <div class='row'>
-                <div class='col'>
-                    <h5>${escapeHtml(cards[0].name)}</h5>
-                    <h6>${escapeHtml(predictions.carte1?.nom || "Nom non disponible")}</h6>
-                    <img class='card' src='${cards[0].image_url}' alt='${escapeHtml(cards[0].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                    <p>${escapeHtml(predictions.carte1?.signification || "Signification non disponible")}</p>
+                <div class='col text-center'>
+                    <h5>${escapeHtml(predictions[0].carte3?.carte )}</h5>
+                    <h6>${escapeHtml(predictions[0].carte3?.nom || "Nom non disponible")}</h6>
+                    <div class="d-flex justify-content-center">
+                        <img class='card' src='${predictions[0].carte3?.card_image}' alt='${escapeHtml(predictions[0].carte3?.carte)}' style='width: 100px; height: 150px; margin: 10px; cursor: pointer;' onclick="showImageModal('${predictions[0].carte3?.card_image}', '${escapeHtml(predictions[0].carte3?.carte)}')"'>
+                    </div>
+                    <p>${escapeHtml(predictions[0].carte3?.signification || "Signification non disponible")}</p>
                 </div>
             </div>
             <div class='row'>
-                <div class='col'>
-                    <h5>${escapeHtml(cards[1].name)}</h5>
-                    <h6>${escapeHtml(predictions.carte2?.nom || "Nom non disponible")}</h6>
-                    <img class='card' src='${cards[1].image_url}' alt='${escapeHtml(cards[1].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                    <p>${escapeHtml(predictions.carte2?.signification || "Signification non disponible")}</p>
+                <div class='col text-center'>
+                    <h5>${escapeHtml(predictions[0].carte1?.carte )}</h5>
+                    <h6>${escapeHtml(predictions[0].carte1?.nom || "Nom non disponible")}</h6>
+                    <div class="d-flex justify-content-center">
+                        <img class='card' src='${predictions[0].carte1?.card_image}' alt='${escapeHtml(predictions[0].carte1?.carte)}' style='width: 100px; height: 150px; margin: 10px; cursor: pointer;' onclick="showImageModal('${predictions[0].carte1?.card_image}', '${escapeHtml(predictions[0].carte1?.carte)}')"'>
+                    </div>
+                    <p>${escapeHtml(predictions[0].carte1?.signification || "Signification non disponible")}</p>
+                </div>
+                <div class='col text-center'>
+                    <h5>${escapeHtml(predictions[0].carte5?.carte )}</h5>
+                    <h6>${escapeHtml(predictions[0].carte5?.nom || "Nom non disponible")}</h6>
+                    <div class="d-flex justify-content-center">
+                        <img class='card' src='${predictions[0].carte5?.card_image}' alt='${escapeHtml(predictions[0].carte5?.carte)}' style='width: 100px; height: 150px; margin: 10px; cursor: pointer;' onclick="showImageModal('${predictions[0].carte5?.card_image}', '${escapeHtml(predictions[0].carte5?.carte)}')"'>
+                    </div>
+                    <p>${escapeHtml(predictions[0].carte5?.signification || "Signification non disponible")}</p>
+                </div>
+                <div class='col text-center'>
+                    <h5>${escapeHtml(predictions[0].carte2?.carte)}</h5>
+                    <h6>${escapeHtml(predictions[0].carte2?.nom || "Nom non disponible")}</h6>
+                    <div class="d-flex justify-content-center">
+                        <img class='card' src='${predictions[0].carte2?.card_image}' alt='${escapeHtml(predictions[0].carte2?.carte)}' style='width: 100px; height: 150px; margin: 10px; cursor: pointer;' onclick="showImageModal('${predictions[0].carte2?.card_image}', '${escapeHtml(predictions[0].carte2?.carte)}')"'>
+                    </div>
+                    <p>${escapeHtml(predictions[0].carte2?.signification || "Signification non disponible")}</p>
                 </div>
             </div>
             <div class='row'>
-                <div class='col'>
-                    <h5>${escapeHtml(cards[2].name)}</h5>
-                    <h6>${escapeHtml(predictions.carte3?.nom || "Nom non disponible")}</h6>
-                    <img class='card' src='${cards[2].image_url}' alt='${escapeHtml(cards[2].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                    <p>${escapeHtml(predictions.carte3?.signification || "Signification non disponible")}</p>
+                <div class='col text-center'>
+                    <h5>${escapeHtml(predictions[0].carte4?.carte)}</h5>
+                    <h6>${escapeHtml(predictions[0].carte4?.nom || "Nom non disponible")}</h6>
+                    <div class="d-flex justify-content-center">
+                        <img class='card' src='${predictions[0].carte4?.card_image}' alt='${escapeHtml(predictions[0].carte4?.carte)}' style='width: 100px; height: 150px; margin: 10px; cursor: pointer;' onclick="showImageModal('${predictions[0].carte4?.card_image}', '${escapeHtml(predictions[0].carte4?.carte)}')"'>
+                    </div>
+                    <p>${escapeHtml(predictions[0].carte4?.signification || "Signification non disponible")}</p>
                 </div>
             </div>
             <div class='row'>
-                <div class='col'>
-                    <h5>${escapeHtml(cards[3].name)}</h5>
-                    <h6>${escapeHtml(predictions.carte4?.nom || "Nom non disponible")}</h6>
-                    <img class='card' src='${cards[3].image_url}' alt='${escapeHtml(cards[3].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                    <p>${escapeHtml(predictions.carte4?.signification || "Signification non disponible")}</p>
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col'>
-                    <h5>${escapeHtml(cards[4].name)}</h5>
-                    <h6>${escapeHtml(predictions.carte5?.nom || "Nom non disponible")}</h6>
-                    <img class='card' src='${cards[4].image_url}' alt='${escapeHtml(cards[4].name)}' style='width: 100px; height: 150px; margin: 10px;'>
-                    <p>${escapeHtml(predictions.carte5?.signification || "Signification non disponible")}</p>
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col'>
+                <div class='col text-center'>
                     <h5>Prédiction</h5>
-                    <p>${escapeHtml(predictions.prediction || "Prédiction non disponible")}</p>
+                    <p>${escapeHtml(predictions[0].prediction || "Prédiction non disponible")}</p>
                 </div>
             </div>
             <div class='row'>
-                <div class='col'>
+                <div class='col text-center'>
                     <h5>Réponse à la question</h5>
-                    <p>${escapeHtml(predictions.reponse || "Réponse non disponible")}</p>
+                    <p>${escapeHtml(predictions[0].reponse || "Réponse non disponible")}</p>
                 </div>
             </div>
         </div>
+    </div>
     `;
-    document.querySelector('.mCSB_container').innerHTML += displayHtml;
+    clairvoyantMessage(displayHtml);
     updateScrollbar();
 }
+
+function showImageModal(imageUrl, imageAlt) {
+    // Modifier l'image de la modale
+    const modalImage = document.getElementById('modalImage');
+    modalImage.src = imageUrl;
+    modalImage.alt = imageAlt;
+
+    // Afficher la modale
+    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    imageModal.show();
+}
+
 
 function oneCardResponse(data) {
     card_response = "<div class='col cta-inner text-center rounded'>" +
