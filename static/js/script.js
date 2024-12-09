@@ -294,16 +294,12 @@ function proposeToChoose(deck_data) {
     updateScrollbar();
 }
 function displayChosenCards(data) {
-    let {cards, predictions} = data;
-    if (!cards || cards.length === 0) {
-        console.error("No cards to display.");
-        return;
-    }
+    let {predictions} = data;
     if (!predictions) {
         console.error("No predictions to display.");
         return;
     }
-    console.log(cards);
+
     console.log(predictions[0]);
 
     let displayHtml = `

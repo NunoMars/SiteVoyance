@@ -49,7 +49,6 @@ def retry_with_backoff(func, *args, **kwargs):
 def voyante_chatbot(input_value):
     """Main function to handle tarot chatbot logic."""
     try:
-
         # Log the input value for debugging
         logger.debug(f"Input value: {input_value}")
 
@@ -216,7 +215,6 @@ def voyante_chatbot(input_value):
         return {
             "subject": "prediction",
             "predictions": [response_dict],
-            "cards": cards,
         }
 
     except Exception as e:
