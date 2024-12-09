@@ -34,7 +34,7 @@ class MajorArcana(models.Model):
 
     def image_tag(self):
 
-        return mark_safe('<img src="%s" width="75" height="75" />' % (self.card_image))
+        return mark_safe(f'<img src="{self.card_image}" width="75" height="75" />')
 
     image_tag.short_description = "Image"
 
