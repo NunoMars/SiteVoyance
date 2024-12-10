@@ -17,9 +17,10 @@ function updateScrollbar() {
 function clairvoyantMessage(message) {
     if ($('.message-input').val() != '') {
         return false;
-    }
-    $('<div class="message new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure>' + message + '</div>').appendTo($('.mCSB_container')).addClass('new');
+    }    
     setDate();
+    updateScrollbar();
+    $('<div class="message new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure>' + message + '</div>').appendTo($('.mCSB_container')).addClass('new');
     updateScrollbar();
 }
 
@@ -117,13 +118,16 @@ function getMessageClairvoyant(msg) {
                 displayChosenCards(data);             
                 clairvoyantMessage("À présent, vous pouvez me poser toutes les questions sur tous les domaines que vous souhaitez. Je me baserai sur votre tirage pour y répondre");                              
             }
+            if (data.subject == "answer") {
+                $('.message.loading').remove();
+                responseCard(data.answer);
+            }
 
             if (data.subject == "No") {
                 $('.message.loading').remove();
                 clairvoyantMessage(data.message); 
                 RedirectionJavascript();
             }
-            clairvoyantMessage(data.message);
         },
     });
 };
@@ -166,8 +170,7 @@ function firstClairvoyantMessage() {
         "<p class='mb-0'>" +
         sentence +
         "</p> "
-    clairvoyantMessage(msg);
-        $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+    clairvoyantMessage(msg);       
     updateScrollbar();
 };
 
@@ -184,7 +187,6 @@ function displayMessageCut(data) {
         "<input id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageCut();'/></div>" +
         "</div></div></div>"
     clairvoyantMessage(message_cut);
-        $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
@@ -201,7 +203,6 @@ function continueChoice() {
         "<p><input id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageNo();'/></p></div>" +
         "</div></div>"
     clairvoyantMessage(msg);
-        $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
@@ -230,7 +231,6 @@ function menuChoices(data) {
         "<p><button id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageOneCard();'/></button></p></div>" +
         "</div></div>"
     clairvoyantMessage(menu);
-        $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
@@ -291,8 +291,8 @@ function proposeToChoose(deck_data) {
             }
         });
     });
-     $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
+    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
 }
 function displayChosenCards(data) {
     let {predictions} = data;
@@ -366,7 +366,7 @@ function displayChosenCards(data) {
         </div>
     </div>
     `;
-    clairvoyantMessage(displayHtml);
+    clairvoyantMessage(displayHtml);    
     updateScrollbar();
 }
 
@@ -399,7 +399,6 @@ function oneCardResponse(data) {
         "<p class='mb-0'>" + data.card_signification_work + "</p>" +
         "</div>"
     clairvoyantMessage(card_response);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
@@ -417,7 +416,6 @@ function chooseCutDeck(data) {
         "<div class='mb-0'><button id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageRight();'/></button></div></div></div>" +
         "</div>"
     clairvoyantMessage(deck_choice);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
@@ -446,63 +444,53 @@ $('.button').click(function() {
 function sendMessageLove() {
     let msg = JSON.stringify({ subject:"love" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
-    updateScrollbar();
 };
 
 function sendMessageWork() {
     let msg = JSON.stringify({ subject:"work" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageGen() {
     let msg = JSON.stringify({ subject:"gen" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageOneCard() {
     let msg = JSON.stringify({ subject:"one" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageCut() {
     let msg = JSON.stringify({ subject:"cut" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageLeft() {
     let msg = JSON.stringify({ subject:"left" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageRight() {
     let msg = JSON.stringify({ subject:"right" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageYes() {
     let msg = JSON.stringify({ subject:"yes" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
 function sendMessageNo() {
     let msg = JSON.stringify({ subject:"no" });
     getMessageClairvoyant(msg);
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
     updateScrollbar();
 };
 
