@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.safestring import mark_safe
+from pgvector.django import VectorField
 
 
 class MajorArcana(models.Model):
@@ -37,6 +38,24 @@ class MajorArcana(models.Model):
         return mark_safe(f'<img src="{self.card_image}" width="75" height="75" />')
 
     image_tag.short_description = "Image"
+
+
+# VectorField is a custom field that allows you to store and query dense vectors.
+
+
+class MajorArcanaVector(models.Model):
+    """Class to define the mayor cards deck."""
+
+    card_id = models.ForeignKey(MajorArcana, on_delete=models.CASCADE)
+    content = models.TextField()  # Texte brut extrait du document
+    embedding = VectorField(dimensions=512)  # Vecteur d'embedding (512 dimensions)
+    metadata = models.JSONField(null=True, blank=True)  # Métadonnées optionnelles
+    file = models.FileField(upload_to="texts")
+    created_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.card_id.card_name_fr
 
 
 class LeftDeck(models.Model):
