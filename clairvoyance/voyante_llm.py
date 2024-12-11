@@ -25,8 +25,14 @@ if api_key := os.getenv("MISTRAL_API_KEY"):
 else:
     raise ValueError("MISTRAL_API_KEY environment variable is not set")
 
+# Define the embedding model
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+logger.info("Embedding model initialized")
+model = ChatMistralAI(mistral_api_key=api_key)
+logger.info("Language model initialized for summarization")
 
-def retry_with_backoff(func, *args, **kwargs):
+
+def retry_with_backoff(func: callable, *args: tuple, **kwargs: dict) -> any:
     """Retry logic with exponential backoff."""
     max_retries = 5
     backoff_factor = 4
@@ -46,7 +52,7 @@ def retry_with_backoff(func, *args, **kwargs):
     raise Exception("Max retries reached")
 
 
-def voyante_chatbot(input_value):
+def voyante_chatbot(input_value, session_key):
     """Main function to handle tarot chatbot logic."""
     try:
         # Log the input value for debugging
@@ -54,12 +60,16 @@ def voyante_chatbot(input_value):
 
         # Prepare the text for each card
         cards_list = input_value.get("list of chosed cards", [])
+        # sauvegarder les cartes dans la session
+        session = Session.objects.get(session_key=session_key)
+        session.cards_list = cards_list
+        session.save()
+
         if not cards_list:
-            raise ValueError("No cards selected")
+            logger.info("Aucune carte fournie. Récupération du tirage précédent.")
+            return get_previous_draw(session_key, input_value)
 
         cards_text = []
-        model = ChatMistralAI(mistral_api_key=api_key)
-        logger.info("Language model initialized for summarization")
 
         cards_text = []
         for card in cards_list:
@@ -86,10 +96,6 @@ def voyante_chatbot(input_value):
         split_texts = text_splitter.split_text(full_text)
         split_documents = [Document(page_content=chunk) for chunk in split_texts]
 
-        # Define the embedding model
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        logger.info("Embedding model initialized")
-
         # Create the vector store with retry logic
         vector = retry_with_backoff(FAISS.from_documents, split_documents, embeddings)
         logger.info(f"Vector store created with {len(split_documents)} documents.")
@@ -98,6 +104,11 @@ def voyante_chatbot(input_value):
         retriever = vector.as_retriever(
             search_type="similarity", search_kwargs={"k": 5}
         )
+        logger.info("Retriever interface created.")
+        # SAve retriever in session
+        session = Session.objects.get(session_key=session_key)
+        session.retriever = retriever
+        session.save()
 
         # Define the prompt template
         prompt = ChatPromptTemplate.from_template(
@@ -182,41 +193,86 @@ def voyante_chatbot(input_value):
         def extract_json(response_text):
             """Extrait la partie JSON valide de la réponse brute."""
             try:
-                # Log de la réponse brute pour le débogage
-                logger.debug("Réponse brute: %s", response_text)
-
                 # Recherche du premier bloc JSON valide
                 json_match = re.search(r"\{.*\}", response_text, re.DOTALL)
                 if json_match:
                     json_data = json_match.group()
-
-                    # Supprimer les nouvelles lignes et les caractères supplémentaires
-                    json_data = re.sub(r"\n", "", json_data)
 
                     # Validation du JSON
                     try:
                         parsed_data = json.loads(json_data)
                         return parsed_data
                     except json.JSONDecodeError as inner_error:
-                        logger.error("Erreur de parsing JSON: %s", inner_error)
+                        logger.error(
+                            f"Erreur de parsing JSON: {inner_error}, données : {json_data}"
+                        )
                         raise ValueError(f"Erreur de parsing JSON : {inner_error}")
                 else:
-                    raise ValueError("Aucun JSON valide trouvé.")
+                    raise ValueError("Aucun JSON valide trouvé dans la réponse.")
             except Exception as e:
                 logger.error(f"Erreur générale dans l'extraction JSON: {e}")
                 raise ValueError(f"Erreur générale : {str(e)}")
 
-        response_dict = extract_json(ai_message.content)
-
-        # Access keys and values
-        for key, value in response_dict.items():
-            print(f"{key}: {value}")
+        if isinstance(ai_message.content, dict):
+            response_dict = extract_json(ai_message.content)
+        else:
+            logger.warning("Retrying JSON extraction...")
+            # Ici, reposez une nouvelle question ou ajustez le prompt si besoin
+            response_text = retry_with_backoff(retrieval_chain.invoke, prompt)
+            response_dict = extract_json(response_text)
 
         return {
             "subject": "prediction",
             "predictions": [response_dict],
         }
 
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return {"subject": "error", "message": str(e)}
+
+
+def get_previous_draw(session_key, input_value):
+    """Récupère le resultat de FAISS pour le tirage précédent qui contiens le tirage deja traité et redemande via un nouveau prompt de repondre."""
+
+    question = input_value.get("question", "Quelle est ma prédiction ?")
+
+    try:
+        # Define the prompt template
+        prompt = ChatPromptTemplate.from_template(
+            """
+            Comme Mme T tarologue, tu dois répondre aux questions des clients sur leur avenir en utilisant les cartes de tarot fournies dans le contexte et avec tout ce que tu connais sur la disposition en croix et les significations des cartes entre elles.
+            Si tua plus d'informations que celle fournies tu peux les utiliser a fin de mieux aider l'utilisateur.
+            <context>
+            {context}
+            </context>
+
+            Question: {input}
+        """
+        )
+
+        retriever = Session.objects.get(session_key=session_key).retriever
+
+        # Create the document and retrieval chains
+        document_chain = create_stuff_documents_chain(model, prompt)
+        retrieval_chain = create_retrieval_chain(retriever, document_chain)
+
+        # Pose une question spécifique en fonction des cartes tirées
+        question = input_value.get("question", "Quelle est ma prédiction ?")
+        response = retrieval_chain.invoke(
+            {
+                "input": question,
+                "context": "Tirage précédent",
+            }
+        )
+        prediction = response.get("answer", "No prediction available.")
+
+        # Use AIMessage to structure the response
+        ai_message = AIMessage(content=prediction)
+
+        # Vérifiez si la réponse est vide ou mal formée
+        if not ai_message.content:
+            raise ValueError("Empty response from the model")
+        return {"subject": "chat", "chat": ai_message.content}
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return {"subject": "error", "message": str(e)}

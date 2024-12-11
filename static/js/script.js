@@ -118,6 +118,10 @@ function getMessageClairvoyant(msg) {
                 displayChosenCards(data);             
                 clairvoyantMessage("À présent, vous pouvez me poser toutes les questions sur tous les domaines que vous souhaitez. Je me baserai sur votre tirage pour y répondre");                              
             }
+            if (data.subject == "chat") {
+                $('.message.loading').remove();
+                clairvoyantMessage(data.chat);
+            }
             if (data.subject == "answer") {
                 $('.message.loading').remove();
                 responseCard(data.answer);
@@ -184,7 +188,7 @@ function displayMessageCut(data) {
         "</p></div></div>" +
         "<div class='row'>" +
         "<div class='col'>" +
-        "<input id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageCut();'/></div>" +
+        "<p><button id='bouton_card' class='bouton_card img-fluid' onClick='sendMessageCut();'/></button></p></div>" +
         "</div></div></div>"
     clairvoyantMessage(message_cut);
     updateScrollbar();
@@ -288,11 +292,12 @@ function proposeToChoose(deck_data) {
             if (selectedCards.length === 5) {
                 let msg = JSON.stringify({ subject: "list of chosed cards", "list of chosed cards": selectedCards });
                 getMessageClairvoyant(msg);
+                $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
             }
         });
     });
     updateScrollbar();
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+   
 }
 function displayChosenCards(data) {
     let {predictions} = data;
@@ -300,7 +305,6 @@ function displayChosenCards(data) {
         console.error("No predictions to display.");
         return;
     }
-
     console.log(predictions[0]);
 
     let displayHtml = `

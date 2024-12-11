@@ -2,6 +2,7 @@ from .models import LeftDeck, MajorArcana, RightDeck
 from .prepare_decks_cards import prepare_decks
 from .voyante_llm import voyante_chatbot
 import json
+from django.contrib.sessions.models import Session
 
 
 def send_cards_choosed_deck_to_user(arg0):
@@ -39,7 +40,7 @@ def send_cards_choosed_deck_to_user(arg0):
     }
 
 
-def clairvoyant(input_value):
+def clairvoyant(input_value, session_key):
     """
     Construct the bot response.
     """
@@ -88,7 +89,7 @@ def clairvoyant(input_value):
     elif input_value["subject"] == "right":
         return send_cards_choosed_deck_to_user(RightDeck)
 
-    return voyante_chatbot(input_value)
+    return voyante_chatbot(input_value, session_key)
 
 
 def _get_response_one_card(rand_card):

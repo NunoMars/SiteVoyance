@@ -73,11 +73,16 @@ class CardDetailView(View):
 
 
 def clairvoyante(request):
+    if not request.session.session_key:
+        request.session.create()  # Créer une nouvelle session si nécessaire
+
+    # Récupérer la clé de session
+    session_key = request.session.session_key
     if request.method != "POST":
         return
     with contextlib.suppress(ValueError):
         input_value = request.POST.get("messageInput")
-        result = clairvoyant(input_value)
+        result = clairvoyant(input_value, session_key)
         return JsonResponse(result)
 
 

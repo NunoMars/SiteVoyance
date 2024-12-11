@@ -27,3 +27,4 @@ langchain_community
 langchain_mistralai
 langchain_huggingface
 faiss-cpu
+pgvector
