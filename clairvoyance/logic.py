@@ -39,7 +39,7 @@ def send_cards_choosed_deck_to_user(arg0):
     }
 
 
-def clairvoyant(input_value, session_key):
+def clairvoyant(request, input_value):
     """
     Construct the bot response.
     """
@@ -88,7 +88,7 @@ def clairvoyant(input_value, session_key):
     elif input_value["subject"] == "right":
         return send_cards_choosed_deck_to_user(RightDeck)
 
-    return voyante_chatbot(input_value, session_key)
+    return voyante_chatbot(request, input_value)
 
 
 def _get_response_one_card(rand_card):

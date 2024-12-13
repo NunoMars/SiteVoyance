@@ -14,5 +14,4 @@ def vectorize_major_arcana(card_id):
         card_id=card,
         content=card_text,
         embedding=embedding,
-        card_text=card_text,
     )

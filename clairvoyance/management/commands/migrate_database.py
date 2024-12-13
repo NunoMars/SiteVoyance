@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from clairvoyance.models import MajorArcana, MajorArcanaVector
+from clairvoyance.models import MajorArcana
 from utils.vectorisation import vectorize_major_arcana
 import json
 

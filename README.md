@@ -2,7 +2,7 @@
 
 # Site-voyance
 
-Projet Saison7 Oclock!
+docker run -d --name pg_vector -e POSTGRES_DB=sitevoyance -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=bcxau9p^^123. -p 5432:5432 pgvector/pgvector:pg17
 
 Site codé en Python DJANGO, AJAX , et Javascript.
 Site en production sur la vm cloud sur <http://nunomars-server.eddi.cloud>!

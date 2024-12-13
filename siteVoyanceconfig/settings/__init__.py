@@ -74,7 +74,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME", "sitevoyance"),
         "USER": os.getenv("DB_USER", "postgres"),
         "PASSWORD": os.getenv("DB_PASSWORD", "default-password"),
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+        "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
@@ -128,3 +128,6 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "default-email@gmail.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "default-password")
+
+# Ajoutez cette ligne pour définir STATIC_ROOT
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")

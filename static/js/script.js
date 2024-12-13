@@ -147,7 +147,8 @@ function RedirectionJavascript() {
 
 $('.message-submit').click(function() {
     insertMessage();
-    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+    $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/><h5>Je lis votre tirage...</h5><img src="../static/img/carte_attente.gif" alt="Carte en attente"></figure><span></span></div>').appendTo($('.mCSB_container'));
+    
     updateScrollbar();
 });
 
@@ -292,7 +293,7 @@ function proposeToChoose(deck_data) {
             if (selectedCards.length === 5) {
                 let msg = JSON.stringify({ subject: "list of chosed cards", "list of chosed cards": selectedCards });
                 getMessageClairvoyant(msg);
-                $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/></figure><span></span></div>').appendTo($('.mCSB_container'));
+                $('<div class="message loading new"><figure class="avatar"><img src= "../static/img/voyante.jpg"/><h5>Je lis votre tirage...</h5><img src="../static/img/carte_attente.gif" alt="Carte en attente"></figure><span></span></div>').appendTo($('.mCSB_container'));
             }
         });
     });

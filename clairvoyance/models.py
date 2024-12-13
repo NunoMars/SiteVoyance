@@ -48,7 +48,7 @@ class MajorArcanaVector(models.Model):
 
     card_id = models.ForeignKey(MajorArcana, on_delete=models.CASCADE)
     content = models.TextField()  # Texte brut extrait du document
-    embedding = VectorField(dimensions=512)  # Vecteur d'embedding (512 dimensions)
+    embedding = VectorField(dimensions=384)  # Vecteur d'embedding (512 dimensions)
     metadata = models.JSONField(null=True, blank=True)  # Métadonnées optionnelles
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
