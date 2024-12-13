@@ -74,16 +74,16 @@ def voyante_chatbot(input_value, session_key):
         cards_text = []
         for card in cards_list:
             try:
-                card_text = MajorArcana.objects.get(card_name_fr=card).card_text()
+                card_text = MajorArcana.objects.get(card_name=card).card_text()
                 cards_text.append(f"{card}: {card_text}")
             except MajorArcana.DoesNotExist:
                 logger.warning(f"Carte {card} non trouvée dans la base de données.")
                 cards_text.append(f"{card}: [Carte non trouvée]")
-        queryset = MajorArcana.objects.filter(card_name_fr__in=cards_list)
+        queryset = MajorArcana.objects.filter(card_name__in=cards_list)
 
         cards = [
             {
-                "name": card.card_name_fr,
+                "name": card.card_name,
                 "image_url": card.card_image.url,
             }
             for card in queryset

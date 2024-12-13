@@ -2,7 +2,6 @@ from .models import LeftDeck, MajorArcana, RightDeck
 from .prepare_decks_cards import prepare_decks
 from .voyante_llm import voyante_chatbot
 import json
-from django.contrib.sessions.models import Session
 
 
 def send_cards_choosed_deck_to_user(arg0):
@@ -28,7 +27,7 @@ def send_cards_choosed_deck_to_user(arg0):
 
     deck_data = [
         {
-            "name": card.card_name_fr,
+            "name": card.card_name,
             "image_url": card.card_image.url,
         }
         for card in deck
@@ -94,11 +93,11 @@ def clairvoyant(input_value, session_key):
 
 def _get_response_one_card(rand_card):
 
-    card_name = rand_card.card_name_fr
-    card_signification_warnings = rand_card.card_signification_warnings_fr
-    card_signification_love = rand_card.card_signification_love_fr
-    card_signification_work = rand_card.card_signification_work_fr
-    card_signification_gen = rand_card.card_signification_gen_fr
+    card_name = rand_card.card_name
+    card_signification_warnings = rand_card.card_signification_warnings
+    card_signification_love = rand_card.card_signification_love
+    card_signification_work = rand_card.card_signification_work
+    card_signification_gen = rand_card.card_signification_gen
 
     return {
         "subject": "one_card",

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from clairvoyance.models import MajorArcana
+from clairvoyance.models import MajorArcana, MajorArcanaVector
+from utils.vectorisation import vectorize_major_arcana
 import json
 
 
@@ -20,5 +21,7 @@ class Command(BaseCommand):
                     card_polarity=i["card_polarity"],
                 )
                 print(f'{i["card_name"]}" Cree en base de données!')
+        for card in MajorArcana.objects.all():  # Vectorise all the cards
+            vectorize_major_arcana(card.id)
 
         self.stdout.write(self.style.SUCCESS("Successfully !!!"))

@@ -12,15 +12,15 @@ class MajorArcana(models.Model):
         ("Neutral", "neutral"),
     )
 
-    card_name_fr = models.CharField(max_length=50)
+    card_name = models.CharField(max_length=50)
 
-    card_signification_gen_fr = models.TextField(default="fr")
+    card_signification_gen = models.TextField(default="fr")
 
-    card_signification_warnings_fr = models.TextField(default="fr")
+    card_signification_warnings = models.TextField(default="fr")
 
-    card_signification_love_fr = models.TextField(default="fr")
+    card_signification_love = models.TextField(default="fr")
 
-    card_signification_work_fr = models.TextField(default="fr")
+    card_signification_work = models.TextField(default="fr")
 
     card_image = models.ImageField(upload_to="MajorArcanaCards")
     card_polarity = models.CharField(max_length=10, choices=CHOICES, default="Positif")
@@ -28,7 +28,7 @@ class MajorArcana(models.Model):
     card_text_summarized = models.TextField(default="none")
 
     def card_text(self):
-        return f"{self.card_signification_gen_fr} {self.card_signification_love_fr} {self.card_signification_work_fr} {self.card_signification_warnings_fr}"
+        return f"{self.card_signification_gen} {self.card_signification_love} {self.card_signification_work} {self.card_signification_warnings}"
 
     def __str__(self):
         return self.card_name_fr
@@ -50,7 +50,6 @@ class MajorArcanaVector(models.Model):
     content = models.TextField()  # Texte brut extrait du document
     embedding = VectorField(dimensions=512)  # Vecteur d'embedding (512 dimensions)
     metadata = models.JSONField(null=True, blank=True)  # Métadonnées optionnelles
-    file = models.FileField(upload_to="texts")
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -64,7 +63,7 @@ class LeftDeck(models.Model):
     card_id = models.ForeignKey(MajorArcana, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.card_id.card_name_fr
+        return self.card_id.card_name
 
 
 class RightDeck(models.Model):
@@ -73,4 +72,4 @@ class RightDeck(models.Model):
     card_id = models.ForeignKey(MajorArcana, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.card_id.card_name_fr
+        return self.card_id.card_name
