@@ -31,7 +31,7 @@ class MajorArcana(models.Model):
         return f"{self.card_signification_gen} {self.card_signification_love} {self.card_signification_work} {self.card_signification_warnings}"
 
     def __str__(self):
-        return self.card_name_fr
+        return self.card_name
 
     def image_tag(self):
 
@@ -54,7 +54,7 @@ class MajorArcanaVector(models.Model):
     uploaded_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.card_id.card_name_fr
+        return self.card_id.card_name
 
 
 class LeftDeck(models.Model):

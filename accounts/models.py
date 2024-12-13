@@ -1,6 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    Group,
+    PermissionsMixin,
+    Permission,
+)
+
 from django.utils.timezone import now
 from clairvoyance.models import MajorArcana
 
@@ -29,6 +35,20 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    groups = models.ManyToManyField(
+        Group,
+        related_name="customuser_set",  # Ajoutez ou modifiez le related_name
+        blank=True,
+        help_text="The groups this user belongs to.",
+        verbose_name="groups",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="customuser_set",  # Ajoutez ou modifiez le related_name
+        blank=True,
+        help_text="Specific permissions for this user.",
+        verbose_name="user permissions",
+    )
     first_name = models.CharField(max_length=254, blank=True)
     second_name = models.CharField(max_length=254, blank=True)
     is_staff = models.BooleanField(default=False)
